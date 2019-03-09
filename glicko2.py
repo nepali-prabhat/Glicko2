@@ -32,26 +32,26 @@ def sum_value_v(meu,meu_j,phi_j):
     e = E(meu,meu_j,phi_j) 
     return g(phi_j)**2*e*(1-e)
 
-def v(meu,meu_opponents,phi_opponents):
+def v():
     value = 0;
     for j in range(len(meu_opponents)):
         value += sum_value_v(meu, meu_opponents[j], phi_opponents[j])
     return math.pow(value,-1)
 
-value_of_v = v(meu,meu_opponents,phi_opponents)
+value_of_v = v()
 print("v=",value_of_v)
 
 def sum_value_delta(s_j,meu,meu_j,phi_j):
     return g(phi_j)*(s_j - E(meu,meu_j,phi_j))
 
-def delta(v,meu,meu_opponents,phi_opponents,s):
+def delta():
     value = 0;
     for j in range(len(meu_opponents)):
         value += sum_value_delta(s[j],meu,meu_opponents[j],phi_opponents[j])
-    value=v*value
+    value=value_of_v*value
     return value
 
-value_of_delta = delta(value_of_v,meu,meu_opponents,phi_opponents,s)
+value_of_delta = delta()
 
 print("delta=",value_of_delta)
 
@@ -61,7 +61,7 @@ f = lambda x:( ( math.exp(x)*(value_of_delta**2 - phi**2 - value_of_v - math.exp
 
 e = 0.000001
 
-def new_sigma(a, value_of_delta,value_of_v,phi,tau):
+def new_sigma():
     A = a
     if value_of_delta**2 > (phi**2 + value_of_v):
         B = math.log(value_of_delta**2 - phi**2- value_of_v)
@@ -84,30 +84,30 @@ def new_sigma(a, value_of_delta,value_of_v,phi,tau):
         f_b = f_c
     sigma_prime = math.exp(A/2)
     return sigma_prime
-sigma_prime = new_sigma(a, value_of_delta,value_of_v,phi,tau)
+sigma_prime = new_sigma()
 print("sigma prime=",sigma_prime)
 def phi_star():
     return math.pow(phi**2+sigma_prime**2,1/2)
 print("phi star=",phi_star())
 
-def new_phi(phi, new_sigma, value_of_v):
+def new_phi():
     val =  math.pow(phi_star(),-1) + math.pow(value_of_v,-1)
     return math.pow(val, -1/2)
 
-phi_prime = new_phi(phi, new_sigma, value_of_v)
+phi_prime = new_phi()
 print("phi prime=",phi_prime)
 def sum_value_new_meu(phi_j,meu,meu_j,s_j):
 
     return g(phi_j)*(s_j-E(meu,meu_j,phi_j))
 
-def new_meu(meu, new_phi, phi_opponents, meu_opponents, s):
+def new_meu():
     value = 0
     for j in range(len(phi_opponents)):
         value += sum_value_new_meu(phi_opponents[j],meu,meu_opponents[j],s[j])
     value = phi_prime**2 * value
     value = value + meu
     return value
-meu_prime = new_meu(meu, new_phi, phi_opponents, meu_opponents, s)
+meu_prime = new_meu()
 print("meu prime=",meu_prime)
 
 def r_from_glicko_scale(meu_prime):
