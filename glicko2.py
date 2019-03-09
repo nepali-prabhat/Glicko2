@@ -1,8 +1,24 @@
 import math
+
+"""
+    r: rating of player
+    RD: rating deviation of player
+    sigma: rating volatility
+    tau: constrains the change in volatility over time
+        i) The volatility measure indicates the degree of expected fluctuation in a player’s
+            rating.
+        ii) The strength of player is predicated within 95% confidence interval
+"""
+"""
+    A player with stats as bellow competed with 3 opponents in a "rating period" 
+    winning first match and loosing the other 2, denoted by array s.
+    Opponent's value of sigma is not necessary.
+"""
 r = 1500
 RD = 200
 sigma = 0.06
 tau = 0.5
+
 opponents={"r":[1400,1550,1700], "RD":[30,100,300]}
 s = [1,0,0]
 
@@ -19,6 +35,7 @@ def E(meu,meu_j,phi_j):
     value = 1+(math.exp(-g(phi_j)*(meu-meu_j)))
     return math.pow(value,-1)
 
+#step 2: we convert all the values of r and RD to glickon scale
 meu = glickon_meu(r)
 print('meu=', meu)
 phi = glickon_phi(RD)
@@ -37,7 +54,8 @@ def v():
     for j in range(len(meu_opponents)):
         value += sum_value_v(meu, meu_opponents[j], phi_opponents[j])
     return math.pow(value,-1)
-
+#step 3: Compute the quantity v, the estimated variance of the team’s/player’s
+#        rating based only on game outcomes.
 value_of_v = v()
 print("v=",value_of_v)
 
@@ -50,17 +68,18 @@ def delta():
         value += sum_value_delta(s[j],meu,meu_opponents[j],phi_opponents[j])
     value=value_of_v*value
     return value
-
+# step 4: Compute the quantity delta, the estimated improvement in rating by comparing the
+#         pre-period rating to the performance rating based only on game outcomes
 value_of_delta = delta()
-
 print("delta=",value_of_delta)
 
+# function ;f' defined, constant 'a' and
+# e: convergance tolerance
 a = math.log(sigma**2)
-
 f = lambda x:( ( math.exp(x)*(value_of_delta**2 - phi**2 - value_of_v - math.exp(x)) ) / (2* (phi**2 + value_of_v + math.exp(x))**2 ) ) - ((x-a)/tau**2)
-
 e = 0.000001
 
+# code for new value of volatility 
 def new_sigma():
     A = a
     if value_of_delta**2 > (phi**2 + value_of_v):
@@ -84,8 +103,11 @@ def new_sigma():
         f_b = f_c
     sigma_prime = math.exp(A/2)
     return sigma_prime
+
+# calculate new value of volatility
 sigma_prime = new_sigma()
 print("sigma prime=",sigma_prime)
+
 def phi_star():
     return math.pow(phi**2+sigma_prime**2,1/2)
 print("phi star=",phi_star())
@@ -93,6 +115,8 @@ print("phi star=",phi_star())
 def new_phi():
     val =  math.pow(phi_star(),-1) + math.pow(value_of_v,-1)
     return math.pow(val, -1/2)
+
+#new values of phi and meu
 
 phi_prime = new_phi()
 print("phi prime=",phi_prime)
@@ -110,6 +134,7 @@ def new_meu():
 meu_prime = new_meu()
 print("meu prime=",meu_prime)
 
+#converting new values of meu and phi to original scale
 def r_from_glicko_scale(meu_prime):
     return meu_prime*173.7178 + 1500
 
